@@ -17,12 +17,15 @@ image.onload = function (e) {
     leftMargin = (image.width - canvas.width)/2;
     topMargin = (image.height - canvas.height)/2;
     $('.content').css({"width":canvasWidth + 'px', "height": canvasHeight + 'px'});
-    $('.img').css({"width":image.width + "px", "height":image.height + "px", "top": "-"+topMargin+"px", "left":"-"+leftMargin+"px"});
+    $('.img').css({"width":image.width + "px", "height":image.height + "px", "top": String(-topMargin)+"px", "left":String(-leftMargin)+"px"});
     initCanvas();
 }
 
 function initCanvas() {
-    clippingRegion = {x:Math.random()*(canvas.width-2*radius)+radius, y:Math.random()*(canvas.height-2*radius)+radius, r:radius};
+    var theLeft = leftMargin<0?-leftMargin:0;
+    var theTop = topMargin<0?--topMargin:0;
+
+    clippingRegion = {x:Math.random()*(canvas.width-2*radius-2*theLeft)+radius+theLeft, y:Math.random()*(canvas.height-2*radius-2*theTop)+radius+theTop, r:radius};
     draw(image,clippingRegion);
 }
 
@@ -30,7 +33,10 @@ function draw(image,clippingRegion) {
     context.clearRect(0,0,canvas.width,canvas.height);
     context.save();
     setClippingRegion(clippingRegion);
-    context.drawImage(image,leftMargin,topMargin,canvasWidth,canvasHeight,0,0,canvasWidth,canvasHeight);
+    context.drawImage(image,Math.max(leftMargin,0),Math.max(topMargin,0),
+        Math.min(canvasWidth,image.width),Math.min(canvasHeight,image.height),
+        leftMargin<0?-leftMargin:0,topMargin<0?-topMargin:0,
+        Math.min(canvasWidth,image.width),Math.min(canvasHeight,image.height));
     context.restore();
 
 }
@@ -54,4 +60,8 @@ function show() {
 
 function reset() {
     initCanvas();
-}
+};
+
+canvas.addEventListener('touchstart',function(e){
+    e.preventDefault()
+});
